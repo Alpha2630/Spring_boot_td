@@ -1,0 +1,133 @@
+openapi: 3.0.3
+info:
+  title: "STD24090"
+  description: "This is a specification of STD24090"
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local server
+
+paths:
+  /booking:
+    get:
+      summary: Récupère toutes les réservations
+      operationId: getAllBookings
+      responses:
+        '200':
+          description: Liste des réservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+
+    post:
+      summary: Crée une nouvelle réservation
+      operationId: createBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+      responses:
+        '200':
+          description: Réservation créée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+        '400':
+          description: Numéro de chambre invalide (hors 1-9)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Chambre déjà réservée pour cette date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+      required:
+        - name
+        - phone
+        - email
+
+    Room:
+      type: object
+      properties:
+        roomNumber:
+          type: integer
+          minimum: 1
+          maximum: 9
+        description:
+          type: string
+      required:
+        - roomNumber
+
+    Booking:
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+        - $ref: '#/components/schemas/Room'
+        - type: object
+          properties:
+            id:
+              type: integer
+            bookingDate:
+              type: string
+              format: date
+              example: "05/09/2025"
+            description:
+              type: string
+          required:
+            - id
+            - bookingDate
+
+    BookingRequest:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+        customerEmail:
+          type: string
+        roomNumber:
+          type: integer
+          minimum: 1
+          maximum: 9
+        roomDescription:
+          type: string
+        bookingDate:
+          type: string
+          example: "05/09/2025"
+      required:
+        - customerName
+        - customerPhone
+        - customerEmail
+        - roomNumber
+        - bookingDate
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: string
